@@ -1,17 +1,31 @@
-import React, {useMemo} from 'react';
+import React, {useMemo, useState, useEffect} from 'react';
 import ContentHeader from '../../components/ContentHeader';
 import SelectInput from '../../components/SelectInput';
 import HistoryCard from '../../components/HistoryCard';
 
+import Utils from '../../utils/walletUtils';
+
 import {Container, Content, Filters} from  './styles'
+
+import profit from '../../repositories/profit';
+import debt from '../../repositories/debt';
 
 interface IRouteParams {
     match: {
         params: {
             type: string;
-            lineColor: string;
         }
     }
+}
+
+interface iData {
+    id: number;
+    description: string;
+    amountFormatted: string;
+    type: string;
+    frequency: string;
+    dateFormatted: string;
+    tagColor: string;
 }
 
 const months = [
@@ -26,26 +40,44 @@ const years = [
 
 const List: React.FC<IRouteParams> = ({match}) => {
 
-    const {type, lineColor} = match.params;
+    const [data, setData] = useState<iData[]>([]);
 
-    const titleProps = useMemo(() => {
-        
+    const {type} = match.params;
+
+    const contentProps = useMemo(() => {
         return type === 'profit' ? 
             {
                 title:'Entradas', 
-                lineColor: '#F7931B'
+                lineColor: '#F7931B',
+                content: profit
             } 
             : 
             {
                 title:'Saídas', 
-                lineColor: '#E44C4E'
+                lineColor: '#E44C4E',
+                content: debt
             }
-            
     },[type]);
+
+
+    useEffect(() => {
+        const lista = contentProps.content.map(item => {
+            return {
+                id: Math.random() * contentProps.content.length,
+                description: item.description,
+                amountFormatted: Utils.formatCurrency(item.amount),
+                type: item.type,
+                frequency: item.frequency,
+                dateFormatted: Utils.formatDate(item.date),
+                tagColor: item.frequency === 'recorrente' ? '#E44C4E' : '#4E41F0' 
+            }
+        })
+        setData(lista);
+    }, [contentProps]);
 
     return(
         <Container>
-            <ContentHeader title={titleProps.title} lineColor={titleProps.lineColor}>
+            <ContentHeader title={contentProps.title} lineColor={contentProps.lineColor}>
                 <SelectInput options={months}/>
                 <SelectInput options={years}/>
             </ContentHeader>
@@ -67,24 +99,17 @@ const List: React.FC<IRouteParams> = ({match}) => {
             </Filters>
 
             <Content>
-                <HistoryCard 
-                    tagColor="#E44C4e"
-                    title="Conta de Luz"
-                    subtitle="22/07/2020"
-                    amount="R$ 150,00"
-                />
-                <HistoryCard 
-                    tagColor="#E44C4e"
-                    title="Conta de Luz"
-                    subtitle="22/07/2020"
-                    amount="R$ 175,00"
-                />
-                <HistoryCard 
-                    tagColor="#E44C4e"
-                    title="Conta de Luz"
-                    subtitle="22/07/2020"
-                    amount="R$ 149,70"
-                />
+                {
+                    data.map(item => (
+                        <HistoryCard 
+                            key={item.id}
+                            tagColor={item.tagColor}
+                            title={item.description}
+                            subtitle={item.dateFormatted}
+                            amount={item.amountFormatted}
+                        />
+                    ))
+                }
             </Content>
         </Container>
     );

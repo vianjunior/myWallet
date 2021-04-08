@@ -2,14 +2,14 @@ import React, {useMemo} from 'react';
 
 import {Container, Profile, Welcome, UserName} from './styles'
 
+import Utils from '../../utils/walletUtils';
+
 import Toggle from '../Toggle'
-import emojis from '../../utils/emojis'
 
 const MainHeader: React.FC = () => {
 
     const emoji = useMemo(() => {
-        const i = Math.floor(Math.random() * emojis.length);
-        return emojis[i];
+        return Utils.getRandomEmoji();
     }, []);
 
     return(

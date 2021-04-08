@@ -1,9 +1,18 @@
-import React from 'react';
+import React, {useMemo} from 'react';
 import ContentHeader from '../../components/ContentHeader';
 import SelectInput from '../../components/SelectInput';
 import HistoryCard from '../../components/HistoryCard';
 
 import {Container, Content, Filters} from  './styles'
+
+interface IRouteParams {
+    match: {
+        params: {
+            type: string;
+            lineColor: string;
+        }
+    }
+}
 
 const months = [
     {value: 4, label: 'Abril'},
@@ -15,10 +24,28 @@ const years = [
     {value: 2020, label: '2020'}
 ]
 
-const List: React.FC = () => {
+const List: React.FC<IRouteParams> = ({match}) => {
+
+    const {type, lineColor} = match.params;
+
+    const titleProps = useMemo(() => {
+        
+        return type === 'profit' ? 
+            {
+                title:'Entradas', 
+                lineColor: '#F7931B'
+            } 
+            : 
+            {
+                title:'Saídas', 
+                lineColor: '#E44C4E'
+            }
+            
+    },[type]);
+
     return(
         <Container>
-            <ContentHeader title="Saídas" lineColor="#E44C4E">
+            <ContentHeader title={titleProps.title} lineColor={titleProps.lineColor}>
                 <SelectInput options={months}/>
                 <SelectInput options={years}/>
             </ContentHeader>
